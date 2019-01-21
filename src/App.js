@@ -6,6 +6,7 @@ import Todos from './components/Todos';
 import AddTodo from './components/AddTodo';
 import './App.css';
 import uuid from 'uuid'
+import axios from 'axios';
 
 class App extends Component {
   state = {
@@ -28,6 +29,11 @@ class App extends Component {
     ]
   }
 
+  componentDidMount() {
+    axios.get('https://jsonplaceholder.typicode.com/todos?_limit=10')
+      .then(({data}) => this.setState({ todos: data }))
+  }
+
   markComplete = (id) => {
     console.log('markComplete', id)
     this.setState({
@@ -42,19 +48,20 @@ class App extends Component {
   }
 
   delTodo = (id) => {
-    console.log('delTodo', id);
-    this.setState({
-      todos: [...this.state.todos.filter(todo => todo.id !== id)]
-    });
+    axios.delete(`https://jsonplaceholder.typicode.com/todos/${id}`)
+      .then(res => {
+        this.setState({
+          todos: [...this.state.todos.filter(todo => todo.id !== id)]
+        });
+      });
   }
 
   addTodo = (title) => {
-    let newTodo = {
-      id: uuid.v4(),
+    axios.post('https://jsonplaceholder.typicode.com/todos', {
       title,
       completed: false
-    };
-    this.setState({ todos: [...this.state.todos, newTodo] })
+    })
+      .then(res => this.setState({ todos: [...this.state.todos, res.data] }));
   }
 
   render() {
